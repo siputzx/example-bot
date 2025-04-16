@@ -1,0 +1,17 @@
+{
+  "name": "base",
+  "version": "1.0.0",
+  "description": "base",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "base",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "baileys": "latest",
+    "file-type": "^16.5.3",
+    "pino": "^7.0.5"
+  }
+}
