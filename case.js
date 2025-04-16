@@ -64,7 +64,7 @@ module.exports = async (ptz, m) => {
           m.reply(data.data)
         }
         break
-        case 'claude':
+      case 'claude':
         {
           if (!text) {
             return m.reply('Mau nanya apa sama ai')
@@ -73,7 +73,7 @@ module.exports = async (ptz, m) => {
           m.reply(data.data)
         }
         break
-        
+
       case 'nous-hermes':
         {
           if (!text) {
@@ -92,7 +92,7 @@ module.exports = async (ptz, m) => {
           m.reply(data.data)
         }
         break
-        case 'bard':
+      case 'bard':
         {
           if (!text) {
             return m.reply('Mau nanya apa sama ai')
@@ -100,7 +100,7 @@ module.exports = async (ptz, m) => {
           let {data} = await api.get('/ai/bard', {params: {query: text}})
           m.reply(data.data)
         }
-        break       
+        break
       case 'joko':
         {
           if (!text) {
@@ -114,39 +114,39 @@ module.exports = async (ptz, m) => {
           await ptz.sendFile(m.chat, res, '', ``, m)
         }
         break
-        case 'bard-thinking':
-          {
-            if (!text) {
-              return m.reply('Mau nanya apa sama ai')
-            }
-        
-            let { data } = await api.get('/ai/bard-thinking', { params: { query: text } })
-        
-            let response = data.data
-            let thinkMatch = response.match(/<think>([\s\S]*?)<\/think>/)
-        
-            if (thinkMatch) {
-              let thinkRaw = thinkMatch[0].trim()
-              let thinkText = thinkMatch[1]
-        
-              let modifiedThink = thinkText
-                .split('\n')
-                .map(line => {
-                  if (line.trim() === '') return ''
-                  return '> ' + line.trim()
-                })
-                .join('\n')
-        
-              let afterThink = response.split(thinkMatch[0])[1]?.trim() || ''
-        
-              let finalText = `${modifiedThink}\n\n${afterThink}`
-        
-              m.reply(finalText)
-            } else {
-              m.reply(response)
-            }
+      case 'bard-thinking':
+        {
+          if (!text) {
+            return m.reply('Mau nanya apa sama ai')
           }
-          break
+
+          let {data} = await api.get('/ai/bard-thinking', {params: {query: text}})
+
+          let response = data.data
+          let thinkMatch = response.match(/<think>([\s\S]*?)<\/think>/)
+
+          if (thinkMatch) {
+            let thinkRaw = thinkMatch[0].trim()
+            let thinkText = thinkMatch[1]
+
+            let modifiedThink = thinkText
+              .split('\n')
+              .map(line => {
+                if (line.trim() === '') return ''
+                return '> ' + line.trim()
+              })
+              .join('\n')
+
+            let afterThink = response.split(thinkMatch[0])[1]?.trim() || ''
+
+            let finalText = `${modifiedThink}\n\n${afterThink}`
+
+            m.reply(finalText)
+          } else {
+            m.reply(response)
+          }
+        }
+        break
       case 'bukalapak':
         {
           if (!text) return m.reply(`mau belanja apa nih, di bukalapak\n\nExample: ${prefix}${command} hp`)
@@ -278,7 +278,9 @@ module.exports = async (ptz, m) => {
         {
           if (!text) return m.reply(`mau nyari quotes anime apa?\n\nExample: ${prefix}${command} Anna Yamada`)
           const response = await api.get('/search/quotesanime', {
-            text: text
+            params: {
+              text: text
+            }
           })
           if (Array.isArray(response.data.data)) {
             const res = response.data.data
@@ -359,8 +361,10 @@ module.exports = async (ptz, m) => {
             return m.reply(
               `mau download apa?\n\nExample: ${prefix}${command} https://www.instagram.com/reel/C6F57rGrV_x/?igsh=OXJxanVpdHdiczVi`
             )
-          const response = await api.get('/downloader/instagram', {
-            text: text
+          const response = await api.get('/d/igdl', {
+            params: {
+              url: text
+            }
           })
           const result = response.data.data[0]
 
@@ -371,12 +375,20 @@ module.exports = async (ptz, m) => {
       case 'twdl':
         {
           if (!text) return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://twitter.com/9GAG/status/1661175429859012608`)
-          const response = await api.get('/downloader/twitter', {
-            text: text
+          const response = await api.get('/d/twitter', {
+            params: {
+              url: text
+            }
           })
           const result = response.data.data
 
-          await ptz.sendFile(m.chat, result.downloadLink, '', `- *Video Description: _${result.videoDescription}_*`, m)
+          await ptz.sendFile(
+            m.chat,
+            result.downloadLink,
+            '',
+            `┌ ◦ *Title:* ${result.videoTitle}\n└ ◦ *Description:* ${result.videoDescription}`,
+            m
+          )
         }
         break
       case 'soundclouddl':
@@ -384,8 +396,10 @@ module.exports = async (ptz, m) => {
         {
           if (!text)
             return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://m.soundcloud.com/teguh-hariyadi-652597010/anji-dia`)
-          const response = await api.get('/downloader/soundcloud', {
-            text: text
+          const response = await api.get('/d/twitter', {
+            params: {
+              url: text
+            }
           })
           const result = response.data.data
 
@@ -397,7 +411,9 @@ module.exports = async (ptz, m) => {
         {
           if (!text) return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://www.capcut.com/t/Zs8MPAKjG`)
           const response = await api.get('/downloader/capcut', {
-            text: text
+            params: {
+              text: text
+            }
           })
           const result = response.data.data
 
@@ -418,7 +434,9 @@ module.exports = async (ptz, m) => {
               `mau download apa?\n\nExample: ${prefix}${command} https://www.facebook.com/alanwalkermusic/videos/277641643524720`
             )
           const response = await api.get('/downloader/facebook', {
-            text: text
+            params: {
+              text: text
+            }
           })
           const result = response.data.data
 
@@ -436,7 +454,9 @@ module.exports = async (ptz, m) => {
         {
           if (!text) return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://id.pinterest.com/pin/862439397377053654/`)
           const response = await api.get('/downloader/pinterest', {
-            text: text
+            params: {
+              text: text
+            }
           })
           const result = response.data.data
 
@@ -447,7 +467,9 @@ module.exports = async (ptz, m) => {
         {
           if (!text) return m.reply(`mau stalking profil Instagram siapa?\n\nExample: ${prefix}${command} jokowi`)
           const response = await api.get('/stalker/instagram', {
-            text: text
+            params: {
+              text: text
+            }
           })
           const result = response.data.data
           await ptz.sendMessage(m.chat, {
@@ -469,7 +491,9 @@ module.exports = async (ptz, m) => {
         {
           if (!text) return m.reply(`mau stalking profil tiktok siapa?\n\nExample: ${prefix}${command} mrbeast`)
           const response = await api.get('/stalker/tiktok', {
-            text: text
+            params: {
+              text: text
+            }
           })
           const result = response.data.data
           await ptz.sendMessage(m.chat, {
@@ -491,7 +515,9 @@ module.exports = async (ptz, m) => {
         {
           if (!text) return m.reply(`mau stalking profil tiktok siapa?\n\nExample: ${prefix}${command} dikaardnt`)
           const response = await api.get('/stalker/github', {
-            text: text
+            params: {
+              text: text
+            }
           })
           const result = response.data.data
           await ptz.sendMessage(m.chat, {
@@ -509,123 +535,88 @@ module.exports = async (ptz, m) => {
           })
         }
         break
-case 'meme': {
-  api.get('/r/lahelu').then(async ({ data }) => {
-    const result = data.data
-    const randomMeme = result[Math.floor(Math.random() * result.length)]
-    const mediaUrl = randomMeme.media
-    const createdAt = new Date(randomMeme.createTime).toLocaleString('id-ID', {
-      dateStyle: 'medium',
-      timeStyle: 'short'
-    })
+      case 'meme':
+        {
+          api
+            .get('/r/lahelu')
+            .then(async ({data}) => {
+              const result = data.data
+              const randomMeme = result[Math.floor(Math.random() * result.length)]
+              const mediaUrl = randomMeme.media
+              const createdAt = new Date(randomMeme.createTime).toLocaleString('id-ID', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+              })
 
-    await ptz.sendFile(
-      m.chat,
-      mediaUrl,
-      '',
-      `┌ ◦ *Title:* ${randomMeme.title}
+              await ptz.sendFile(
+                m.chat,
+                mediaUrl,
+                '',
+                `┌ ◦ *Title:* ${randomMeme.title}
 │ ◦ *Upvotes:* ${randomMeme.totalUpvotes}
 └ ◦ *Created:* ${createdAt}`,
-      m
-    )
-  }).catch((err) => {
-    console.error(err)
-    m.reply('Maaf Sayang~ Gagal ngambil meme, coba lagi nanti ya!')
-  })
-}
-break
-case 'an1': {
-  if (!text) return m.reply(`Mau nyari apa di an1? Misalnya: ${prefix}${command} pou`)
-  
-  const response = await api.get('/apk/an1', { params: { search: text } })
-  if (Array.isArray(response.data.data)) {
-    const res = response.data.data
-    const firstImage = res[0].image // Ambil image pertama
-    
-    let message = ''
-    for (const item of res) {
-      message += `┌ ◦ *Title:* ${item.title}
+                m
+              )
+            })
+            .catch(err => {
+              console.error(err)
+              m.reply('Maaf Sayang~ Gagal ngambil meme, coba lagi nanti ya!')
+            })
+        }
+        break
+      case 'an1':
+        {
+          if (!text) return m.reply(`Mau nyari apa di an1? Misalnya: ${prefix}${command} pou`)
+
+          const response = await api.get('/apk/an1', {params: {search: text}})
+          if (Array.isArray(response.data.data)) {
+            const res = response.data.data
+            const firstImage = res[0].image
+
+            let message = ''
+            for (const item of res) {
+              message += `┌ ◦ *Title:* ${item.title}
 │ ◦ *Developer:* ${item.developer}
 │ ◦ *Rating:* ${item.rating.value} (${item.rating.percentage}%)
 └ ◦ *Link:* ${item.link}\n\n`
-    }
+            }
 
-    await ptz.sendFile(
-      m.chat,
-      firstImage,
-      '',
-      message,
-      m
-    )
-  } else {
-    m.reply('No data found')
-  }
-}
-break
-case 'happymod': {
-  if (!text) return m.reply(`Mau nyari apa di HappyMod? Misalnya: ${prefix}${command} pou`)
+            await ptz.sendFile(m.chat, firstImage, '', message, m)
+          } else {
+            m.reply('No data found')
+          }
+        }
+        break
+      case 'happymod':
+        {
+          if (!text) return m.reply(`Mau nyari apa di HappyMod? Misalnya: ${prefix}${command} pou`)
 
-  const response = await api.get('/apk/happymod', { params: { search: text } })
-  if (Array.isArray(response.data.data)) {
-    const res = response.data.data
-    const firstImage = res[0].image || '' // fallback kalau ga ada gambar
+          const response = await api.get('/apk/happymod', {params: {search: text}})
+          if (Array.isArray(response.data.data)) {
+            const res = response.data.data
+            const firstImage = res[0].image || '' // fallback kalau ga ada gambar
 
-    let message = ''
-    for (const item of res) {
-      const rating = typeof item.rating === 'object' ? `${item.rating.value || 'N/A'} (${item.rating.percentage || '0'}%)` : item.rating || 'N/A'
-      const mod = Array.isArray(item.modFeatures) ? item.modFeatures.join(', ') : item.modFeatures || 'N/A'
-      const version = item.version || 'N/A'
+            let message = ''
+            for (const item of res) {
+              const rating =
+                typeof item.rating === 'object' ? `${item.rating.value || 'N/A'} (${item.rating.percentage || '0'}%)` : item.rating || 'N/A'
+              const mod = Array.isArray(item.modFeatures) ? item.modFeatures.join(', ') : item.modFeatures || 'N/A'
+              const version = item.version || 'N/A'
 
-      message += `┌ ◦ *Title:* ${item.title}
+              message += `┌ ◦ *Title:* ${item.title}
 │ ◦ *Versi:* ${version}
 │ ◦ *Rating:* ${rating}
 │ ◦ *Fitur Mod:* ${mod}
 └ ◦ *Link:* ${item.link}\n\n`
-    }
-
-    await ptz.sendFile(
-      m.chat,
-      firstImage,
-      '',
-      message,
-      m
-    )
-  } else {
-    m.reply('Data nggak ditemukan, Sayang~ Coba kata kunci lain ya!')
-  }
-}
-break
-      default:
-        if (budy.startsWith('=>')) {
-          if (!isCreator) return
-          function Return(sul) {
-            sat = JSON.stringify(sul, null, 2)
-            bang = util.format(sat)
-            if (sat == undefined) {
-              bang = util.format(sul)
             }
-            return m.reply(bang)
-          }
-          try {
-            m.reply(util.format(eval(`(async () => { return ${budy.slice(3)} })()`)))
-          } catch (e) {
-            m.reply(String(e))
+
+            await ptz.sendFile(m.chat, firstImage, '', message, m)
+          } else {
+            m.reply('Data nggak ditemukan, Sayang~ Coba kata kunci lain ya!')
           }
         }
-
-        if (budy.startsWith('<')) {
-          if (!isCreator) return
-          let kode = budy.trim().split(/ +/)[0]
-          let teks
-          try {
-            teks = await eval(`(async () => { ${kode == '>>' ? 'return' : ''} ${q}})()`)
-          } catch (e) {
-            teks = e
-          } finally {
-            await m.reply(require('util').format(teks))
-          }
-        }
-
+        break
+      default:
         if (budy.startsWith('$')) {
           if (!isCreator) return
           exec(budy.slice(2), (err, stdout) => {

@@ -16,7 +16,7 @@ const {
 const {Boom} = require('@hapi/boom')
 const FileType = require('file-type')
 const path = require('path')
-const fetch = require('node-fetch')
+const axios = require('axios')
 const pino = require('pino')
 const fs = require('fs')
 const readline = require('readline')
@@ -137,9 +137,24 @@ async function startBotz() {
         ? Buffer.from(PATH.split`,`[1], 'base64')
         : /^https?:\/\//i.test(PATH)
           ? await (async () => {
-              res = await fetch(PATH, {timeout: 10000})
-              if (!res.ok) throw new Error(`HTTP ${res.status}`)
-              return res.buffer()
+              res = await axios.get(PATH, {
+                responseType: 'arraybuffer',
+                timeout: 10000,
+                headers: {
+                  'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                  Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                  'Accept-Language': 'en-US,en;q=0.9',
+                  'Cache-Control': 'no-cache',
+                  Pragma: 'no-cache',
+                  'Sec-Fetch-Mode': 'navigate',
+                  'Sec-Fetch-Site': 'same-origin',
+                  'Sec-Fetch-User': '?1',
+                  'Upgrade-Insecure-Requests': '1'
+                }
+              })
+              if (res.status !== 200) throw new Error(`HTTP ${res.status}`)
+              return Buffer.from(res.data)
             })()
           : fs.existsSync(PATH)
             ? ((filename = PATH), fs.readFileSync(PATH))
