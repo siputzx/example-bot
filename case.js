@@ -73,7 +73,6 @@ module.exports = async (ptz, m) => {
           m.reply(data.data)
         }
         break
-
       case 'nous-hermes':
         {
           if (!text) {
@@ -147,27 +146,12 @@ module.exports = async (ptz, m) => {
           }
         }
         break
-      case 'bukalapak':
-        {
-          if (!text) return m.reply(`mau belanja apa nih, di bukalapak\n\nExample: ${prefix}${command} hp`)
-          const response = await api.get('/search/bukalapak', {params: {content: text}})
-          let result = `*Hasil Pencarian: _${text}_*\n`
-          if (Array.isArray(response.data.data)) {
-            response.data.data.forEach(item => {
-              result += `┌ ◦ *Title :* ${item.title}\n│ ◦ *Harga :* ${item.harga}\n│ ◦ *Image :* ${item.image}\n└ ◦ *Link :* ${item.link}\n\n`
-            })
-          } else {
-            result = 'No data found'
-          }
-          m.reply(result.trim())
-        }
-        break
       case 'seegore':
         {
           if (!text) return m.reply(`mau ngapain jir nyari gore☠️\n\nExample: ${prefix}${command} train`)
-          const response = await api.get('/search/seegore', {params: {content: text}})
+          const response = await api.get('/s/seegore', {params: {query: text}})
 
-          let result = `*Hasil Pencarian: _${text}_*\n`
+          let result = `*Hasil Pencarian: _${text}_*\n\n`
           if (Array.isArray(response.data.data)) {
             response.data.data.forEach(item => {
               result += `┌ ◦ *Judul :* ${item.judul}\n│ ◦ *Tag :* ${item.uploader}\n└ ◦ *Link :* ${item.link}\n\n`
@@ -181,7 +165,7 @@ module.exports = async (ptz, m) => {
       case 'lahelu':
         {
           if (!text) return m.reply(`mau nyari apa di lahelu\n\nExample: ${prefix}${command} kucing`)
-          const response = await api.get('/search/lahelu', {params: {content: text}})
+          const response = await api.get('/s/lahelu', {params: {query: text}})
 
           let result = `*Hasil Pencarian: _${text}_*\n`
           if (Array.isArray(response.data.data)) {
@@ -201,7 +185,7 @@ module.exports = async (ptz, m) => {
       case 'playstore':
         {
           if (!text) return m.reply(`mau nyari apa di playstore\n\nExample: ${prefix}${command} free fire`)
-          const response = await api.get('/search/playstore', {params: {content: text}})
+          const response = await api.get('/apk/playstore', {params: {query: text}})
 
           let result = `*Hasil Pencarian: _${text}_*\n`
           if (Array.isArray(response.data.data)) {
@@ -221,19 +205,33 @@ module.exports = async (ptz, m) => {
       case 'soundcloud':
         {
           if (!text) return m.reply(`mau nyari apa di soundcloud\n\nExample: ${prefix}${command} duka`)
-          const response = await api.get('/search/soundcloud', {params: {content: text}})
+          const response = await api.get('/s/soundcloud', {params: {query: text}})
 
           let result = `*Hasil Pencarian: _${text}_*\n`
           if (Array.isArray(response.data.data)) {
             response.data.data.forEach(item => {
               result += `
-┌ ◦ *Title :* ${item.title}
-└ ◦ *Link :* ${item.link}\n\n`
+┌ ◦ *Title :* ${item.permalink}
+│ ◦ *Duration:* ${item.duration}
+│ ◦ *Created :* ${item.created_at}
+└ ◦ *Link :* ${item.permalink_url}\n\n`
             })
           } else {
             result = 'No data found'
           }
-          m.reply(result.trim())
+          await ptz.sendMessage(m.chat, {
+            text: result.trim(),
+            contextInfo: {
+              externalAdReply: {
+                title: text,
+                body: 'Search SoundCloud',
+                thumbnailUrl: response.data.data[0].artwork_url,
+                sourceUrl: "",
+                mediaType: 1,
+                renderLargerThumbnail: true
+              }
+            }
+          })
         }
         break
       case 'pinterest':
@@ -277,11 +275,7 @@ module.exports = async (ptz, m) => {
       case 'quotesanime':
         {
           if (!text) return m.reply(`mau nyari quotes anime apa?\n\nExample: ${prefix}${command} Anna Yamada`)
-          const response = await api.get('/search/quotesanime', {
-            params: {
-              text: text
-            }
-          })
+          const response = await api.get('/search/quotesanime', {params: {text: text}})
           if (Array.isArray(response.data.data)) {
             const res = response.data.data
             const result = res[Math.floor(Math.random() * res.length)]
@@ -361,11 +355,7 @@ module.exports = async (ptz, m) => {
             return m.reply(
               `mau download apa?\n\nExample: ${prefix}${command} https://www.instagram.com/reel/C6F57rGrV_x/?igsh=OXJxanVpdHdiczVi`
             )
-          const response = await api.get('/d/igdl', {
-            params: {
-              url: text
-            }
-          })
+          const response = await api.get('/d/igdl', {params: {text: text}})
           const result = response.data.data[0]
 
           await ptz.sendFile(m.chat, result.url, '', `Downloader Instagram ✅️`, m)
@@ -375,11 +365,7 @@ module.exports = async (ptz, m) => {
       case 'twdl':
         {
           if (!text) return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://twitter.com/9GAG/status/1661175429859012608`)
-          const response = await api.get('/d/twitter', {
-            params: {
-              url: text
-            }
-          })
+          const response = await api.get('/d/twitter', {params: {text: text}})
           const result = response.data.data
 
           await ptz.sendFile(
@@ -396,11 +382,7 @@ module.exports = async (ptz, m) => {
         {
           if (!text)
             return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://m.soundcloud.com/teguh-hariyadi-652597010/anji-dia`)
-          const response = await api.get('/d/twitter', {
-            params: {
-              url: text
-            }
-          })
+          const response = await api.get('/d/twitter', {params: {text: text}})
           const result = response.data.data
 
           await ptz.sendFile(m.chat, result.url, '', ``, m)
@@ -410,11 +392,7 @@ module.exports = async (ptz, m) => {
       case 'cpcdl':
         {
           if (!text) return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://www.capcut.com/t/Zs8MPAKjG`)
-          const response = await api.get('/downloader/capcut', {
-            params: {
-              text: text
-            }
-          })
+          const response = await api.get('/downloader/capcut', {params: {text: text}})
           const result = response.data.data
 
           await ptz.sendFile(
@@ -433,11 +411,7 @@ module.exports = async (ptz, m) => {
             return m.reply(
               `mau download apa?\n\nExample: ${prefix}${command} https://www.facebook.com/alanwalkermusic/videos/277641643524720`
             )
-          const response = await api.get('/downloader/facebook', {
-            params: {
-              text: text
-            }
-          })
+          const response = await api.get('/downloader/facebook', {params: {text: text}})
           const result = response.data.data
 
           await ptz.sendFile(
@@ -453,32 +427,24 @@ module.exports = async (ptz, m) => {
       case 'pindl':
         {
           if (!text) return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://id.pinterest.com/pin/862439397377053654/`)
-          const response = await api.get('/downloader/pinterest', {
-            params: {
-              text: text
-            }
-          })
+          const response = await api.get('/d/pinterest', {params: {url: text}})
           const result = response.data.data
 
           await ptz.sendFile(m.chat, result.url, '', `┌ ◦ *ID:* ${result.id}\n└ ◦ *Createf at:* ${result.created_at}`, m)
         }
         break
-      case 'stalkig':
+      case 'stalkx':
         {
-          if (!text) return m.reply(`mau stalking profil Instagram siapa?\n\nExample: ${prefix}${command} jokowi`)
-          const response = await api.get('/stalker/instagram', {
-            params: {
-              text: text
-            }
-          })
+          if (!text) return m.reply(`mau stalking profil Instagram siapa?\n\nExample: ${prefix}${command} siputzx`)
+          const response = await api.get('/stalk/twitter', {params: {user: text}})
           const result = response.data.data
           await ptz.sendMessage(m.chat, {
-            text: `* *Profile*\n┌ ◦ *Username:* ${result.username}\n└ ◦ *Description:* ${result.description}\n\n* *Statistik*\n┌ ◦ *Total Postingan:* ${result.stats.posts}\n│ ◦ *Followers:* ${result.stats.followers}\n└ ◦ *Following:* ${result.stats.following}`,
+            text: `* *Profile*\n┌ ◦ *Username:* ${result.username}\n└ ◦ *Description:* ${result.description}\n\n* *Statistik*\n┌ ◦ *Total Postingan:* ${result.stats.tweets}\n│ ◦ *Followers:* ${result.stats.followers}\n└ ◦ *Following:* ${result.stats.following}`,
             contextInfo: {
               externalAdReply: {
                 title: result.username,
                 body: 'Stalker Instagram',
-                thumbnailUrl: result.profileImageUrl,
+                thumbnailUrl: result.profile.image,
                 sourceUrl: 'https://Instagram.com/' + text,
                 mediaType: 1,
                 renderLargerThumbnail: true
@@ -490,14 +456,10 @@ module.exports = async (ptz, m) => {
       case 'stalktt':
         {
           if (!text) return m.reply(`mau stalking profil tiktok siapa?\n\nExample: ${prefix}${command} mrbeast`)
-          const response = await api.get('/stalker/tiktok', {
-            params: {
-              text: text
-            }
-          })
+          const response = await api.get('/stalk/tiktok', {params: {text: text}})
           const result = response.data.data
           await ptz.sendMessage(m.chat, {
-            text: `* *Profile*\n┌ ◦ *Username:* ${result.user.nickname}\n│ ◦ *Verified:* ${result.user.verified ? 'Yes' : 'No'}\n│ ◦ *Private Account:* ${result.user.privateAccount ? 'Yes' : 'No'}\n└ ◦ *Signature:* ${result.user.signature}\n\n* *Statistik*\n┌ ◦ *Total Postingan:* ${result.stats.videoCount}\n│ ◦ *Followers:* ${result.stats.followerCount}\n└ ◦ *Following:* ${result.stats.followingCount}`,
+            text: `* *Profile*\n┌ ◦ *Username:* ${result.user.nickname}\n│ ◦ *Verified:* ${result.user.verified ? 'Yes' : 'No'}\n│ ◦ *Private Account:* ${result.user.privateAccount ? 'Yes' : 'No'}\n└ ◦ *Bio:* ${result.user.signature}\n\n* *Statistik*\n┌ ◦ *Total Postingan:* ${result.stats.videoCount}\n│ ◦ *Followers:* ${result.stats.followerCount}\n└ ◦ *Following:* ${result.stats.followingCount}`,
             contextInfo: {
               externalAdReply: {
                 title: result.user.nickname,
@@ -513,15 +475,11 @@ module.exports = async (ptz, m) => {
         break
       case 'stalkgh':
         {
-          if (!text) return m.reply(`mau stalking profil tiktok siapa?\n\nExample: ${prefix}${command} dikaardnt`)
-          const response = await api.get('/stalker/github', {
-            params: {
-              text: text
-            }
-          })
+          if (!text) return m.reply(`mau stalking profil tiktok siapa?\n\nExample: ${prefix}${command} siputzx`)
+          const response = await api.get('/stalk/github', {params: {text: text}})
           const result = response.data.data
           await ptz.sendMessage(m.chat, {
-            text: `* *Profile*\n┌ ◦ *Username:* ${result.username}\n│ ◦ *Repository Public:* ${result.public_repo}\n│ ◦ *Gist Public:* ${result.public_gists}\n└ ◦ *Bio:* ${result.bio}\n\n* *Statistik*\n┌ ◦ *Created at:* ${result.ceated_at}\n│ ◦ *Followers:* ${result.followers}\n└ ◦ *Following:* ${result.following}`,
+            text: `* *Profile*\n┌ ◦ *Username:* ${result.username}\n│ ◦ *Repository Public:* ${result.public_repo}\n│ ◦ *Gist Public:* ${result.public_gists}\n└ ◦ *Bio:* ${result.bio}\n\n* *Statistik*\n┌ ◦ *Created at:* ${result.created_at}\n│ ◦ *Followers:* ${result.followers}\n└ ◦ *Following:* ${result.following}`,
             contextInfo: {
               externalAdReply: {
                 title: result.username,
@@ -573,7 +531,7 @@ module.exports = async (ptz, m) => {
             const res = response.data.data
             const firstImage = res[0].image
 
-            let message = ''
+            let message = `*Hasil Pencarian: _${text}_*\n\n`
             for (const item of res) {
               message += `┌ ◦ *Title:* ${item.title}
 │ ◦ *Developer:* ${item.developer}
@@ -581,7 +539,19 @@ module.exports = async (ptz, m) => {
 └ ◦ *Link:* ${item.link}\n\n`
             }
 
-            await ptz.sendFile(m.chat, firstImage, '', message, m)
+            await ptz.sendMessage(m.chat, {
+            text: message,
+            contextInfo: {
+              externalAdReply: {
+                title: text,
+                body: 'Search an1',
+                thumbnailUrl: firstImage,
+                sourceUrl: "",
+                mediaType: 1,
+                renderLargerThumbnail: true
+              }
+            }
+          })
           } else {
             m.reply('No data found')
           }
@@ -594,23 +564,31 @@ module.exports = async (ptz, m) => {
           const response = await api.get('/apk/happymod', {params: {search: text}})
           if (Array.isArray(response.data.data)) {
             const res = response.data.data
-            const firstImage = res[0].image || '' // fallback kalau ga ada gambar
+            const firstImage = res[0].image || ''
 
-            let message = ''
+            let message = `*Hasil Pencarian: _${text}_*\n\n`
             for (const item of res) {
               const rating =
                 typeof item.rating === 'object' ? `${item.rating.value || 'N/A'} (${item.rating.percentage || '0'}%)` : item.rating || 'N/A'
               const mod = Array.isArray(item.modFeatures) ? item.modFeatures.join(', ') : item.modFeatures || 'N/A'
               const version = item.version || 'N/A'
 
-              message += `┌ ◦ *Title:* ${item.title}
-│ ◦ *Versi:* ${version}
-│ ◦ *Rating:* ${rating}
-│ ◦ *Fitur Mod:* ${mod}
-└ ◦ *Link:* ${item.link}\n\n`
+              message += `┌ ◦ *Title:* ${item.title}\n│ ◦ *Versi:* ${version}\n│ ◦ *Rating:* ${rating}\n│ ◦ *Fitur Mod:* ${mod}\n└ ◦ *Link:* ${item.link}\n\n`
             }
 
-            await ptz.sendFile(m.chat, firstImage, '', message, m)
+            await ptz.sendMessage(m.chat, {
+            text: message,
+            contextInfo: {
+              externalAdReply: {
+                title: text,
+                body: 'Search Happymod',
+                thumbnailUrl: firstImage,
+                sourceUrl: "",
+                mediaType: 1,
+                renderLargerThumbnail: true
+              }
+            }
+          })
           } else {
             m.reply('Data nggak ditemukan, Sayang~ Coba kata kunci lain ya!')
           }

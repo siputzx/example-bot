@@ -7,6 +7,7 @@ global.owner = [
    "212703897448", //ganti nomor owner
    "", //nomor owner kedua kalo ada
 ];
+
 global.api = require("axios").create({
    baseURL: "https://api.siputzx.my.id/api",
    headers: {

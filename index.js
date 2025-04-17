@@ -20,7 +20,7 @@ const axios = require('axios')
 const pino = require('pino')
 const fs = require('fs')
 const readline = require('readline')
-const {toAudio, toPTT} = require('./lib/converter')
+const { imageToWebp, videoToWebp, webpToImage, webpToVideo, writeExifImg, writeExifVid, writeExif, toAudio, toPTT, toVideo } = require('./lib/converter')
 
 const store = makeInMemoryStore({
   logger: pino().child({level: 'silent', stream: 'store'})
