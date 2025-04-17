@@ -226,7 +226,7 @@ module.exports = async (ptz, m) => {
                 title: text,
                 body: 'Search SoundCloud',
                 thumbnailUrl: response.data.data[0].artwork_url,
-                sourceUrl: "",
+                sourceUrl: '',
                 mediaType: 1,
                 renderLargerThumbnail: true
               }
@@ -540,18 +540,18 @@ module.exports = async (ptz, m) => {
             }
 
             await ptz.sendMessage(m.chat, {
-            text: message,
-            contextInfo: {
-              externalAdReply: {
-                title: text,
-                body: 'Search an1',
-                thumbnailUrl: firstImage,
-                sourceUrl: "",
-                mediaType: 1,
-                renderLargerThumbnail: true
+              text: message,
+              contextInfo: {
+                externalAdReply: {
+                  title: text,
+                  body: 'Search an1',
+                  thumbnailUrl: firstImage,
+                  sourceUrl: '',
+                  mediaType: 1,
+                  renderLargerThumbnail: true
+                }
               }
-            }
-          })
+            })
           } else {
             m.reply('No data found')
           }
@@ -577,18 +577,18 @@ module.exports = async (ptz, m) => {
             }
 
             await ptz.sendMessage(m.chat, {
-            text: message,
-            contextInfo: {
-              externalAdReply: {
-                title: text,
-                body: 'Search Happymod',
-                thumbnailUrl: firstImage,
-                sourceUrl: "",
-                mediaType: 1,
-                renderLargerThumbnail: true
+              text: message,
+              contextInfo: {
+                externalAdReply: {
+                  title: text,
+                  body: 'Search Happymod',
+                  thumbnailUrl: firstImage,
+                  sourceUrl: '',
+                  mediaType: 1,
+                  renderLargerThumbnail: true
+                }
               }
-            }
-          })
+            })
           } else {
             m.reply('Data nggak ditemukan, Sayang~ Coba kata kunci lain ya!')
           }
