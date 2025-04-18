@@ -157,7 +157,7 @@ module.exports = async (ptz, m) => {
               result += `┌ ◦ *Judul :* ${item.judul}\n│ ◦ *Tag :* ${item.uploader}\n└ ◦ *Link :* ${item.link}\n\n`
             })
           } else {
-            result = 'No data found'
+            m.reply('Video Gore '+text+' belum ada untuk saat ini, coba cari yang lain')
           }
           m.reply(result.trim())
         }
@@ -177,7 +177,7 @@ module.exports = async (ptz, m) => {
 └ ◦ *Search Vector :* ${item.searchVector}\n\n`
             })
           } else {
-            result = 'No data found'
+            m.reply('Meme '+text+' belum ada untuk saat ini, coba cari yang lain')
           }
           m.reply(result.trim())
         }
@@ -195,11 +195,23 @@ module.exports = async (ptz, m) => {
 │ ◦ *Rate :* ${item.rate2}
 │ ◦ *Developer :* ${item.developer}
 └ ◦ *Link :* ${item.link_dev}\n\n`
+            })          
+          await ptz.sendMessage(m.chat, {
+              text: result,
+              contextInfo: {
+                externalAdReply: {
+                  title: text,
+                  body: 'Search Playstore',
+                  thumbnailUrl: response.data.data[0].img,
+                  sourceUrl: '',
+                  mediaType: 1,
+                  renderLargerThumbnail: true
+                }
+              }
             })
-          } else {
-            result = 'No data found'
+            } else {
+            m.reply('Aplikasi '+text+' belum ada untuk saat ini, coba cari yang lain')
           }
-          m.reply(result.trim())
         }
         break
       case 'soundcloud':
@@ -208,7 +220,7 @@ module.exports = async (ptz, m) => {
           const response = await api.get('/s/soundcloud', {params: {query: text}})
 
           let result = `*Hasil Pencarian: _${text}_*\n`
-          if (Array.isArray(response.data.data)) {
+          if (Array.isArray(response.data.data) && response.data.data.length > 0) {
             response.data.data.forEach(item => {
               result += `
 ┌ ◦ *Title :* ${item.permalink}
@@ -216,9 +228,6 @@ module.exports = async (ptz, m) => {
 │ ◦ *Created :* ${item.created_at}
 └ ◦ *Link :* ${item.permalink_url}\n\n`
             })
-          } else {
-            result = 'No data found'
-          }
           await ptz.sendMessage(m.chat, {
             text: result.trim(),
             contextInfo: {
@@ -232,13 +241,16 @@ module.exports = async (ptz, m) => {
               }
             }
           })
+          } else {
+            m.reply('Musik '+text+' belum ada untuk saat ini, coba cari yang lain')
+          }
         }
         break
       case 'pinterest':
         {
           if (!text) return m.reply(`mau nyari apa di pinterest\n\nExample: ${prefix}${command} kucing`)
           const response = await api.get('/search/pinterest', {params: {content: text}})
-          if (Array.isArray(response.data.data)) {
+          if (Array.isArray(response.data.data) && response.data.data.length > 0) {
             const pins = response.data.data
             const randomPin = pins[Math.floor(Math.random() * pins.length)]
             await ptz.sendFile(
@@ -249,14 +261,14 @@ module.exports = async (ptz, m) => {
               m
             )
           } else {
-            m.reply('No data found')
+            m.reply('gambar '+text+' belum ada untuk saat ini, coba cari yang lain')
           }
         }
         break
       case 'tiktoks':
         {
           if (!text) return m.reply(`mau nyari apa di tiktok\n\nExample: ${prefix}${command} sad vibes`)
-          const response = await api.get('/search/tiktok', {params: {content: text}})
+          const response = await api.get('/s/tiktok', {params: {query: text}})
           if (Array.isArray(response.data.data)) {
             const res = response.data.data
             const result = res[Math.floor(Math.random() * res.length)]
@@ -268,15 +280,15 @@ module.exports = async (ptz, m) => {
               m
             )
           } else {
-            m.reply('No data found')
+            m.reply('Video tiktok '+text+' belum ada untuk saat ini, coba cari yang lain')
           }
         }
         break
       case 'quotesanime':
         {
           if (!text) return m.reply(`mau nyari quotes anime apa?\n\nExample: ${prefix}${command} Anna Yamada`)
-          const response = await api.get('/search/quotesanime', {params: {text: text}})
-          if (Array.isArray(response.data.data)) {
+          const response = await api.get('/s/animequotes', {params: {query: text}})
+          if (Array.isArray(response.data.data) && response.data.data.length > 0) {
             const res = response.data.data
             const result = res[Math.floor(Math.random() * res.length)]
             await ptz.sendMessage(m.chat, {
@@ -293,7 +305,7 @@ module.exports = async (ptz, m) => {
               }
             })
           } else {
-            m.reply('No data found')
+            m.reply('Quoted Dari '+text+' belum ada untuk saat ini, coba cari yang lain')
           }
         }
         break
@@ -333,21 +345,50 @@ module.exports = async (ptz, m) => {
         }
         break
       case 'tiktokdl':
-      case 'ttdl':
-        {
-          if (!text) return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://vt.tiktok.com/ZSYmxyBnp/`)
-          const response = await api.get('/downloader/tiktok', {params: {content: text}})
-          const result = response.data.data
+case 'ttdl':
+  {
+    if (!text) return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://vt.tiktok.com/ZSYmxyBnp/`)
+    
+    try {
+      const response = await api.get('/tiktok/v2', {params: {url: text}})
+      const result = response.data
+      
+      if (!result.success || !result.data || !result.data.download || !result.data.download.video || result.data.download.video.length === 0) {
+        return m.reply('Gagal mendapatkan video TikTok. Coba link yang lain.')
+      }
+      
+      const videoUrl = result.data.download.video[0]
+      
+      const metadata = result.data.metadata
+      const stats = metadata.stats || {}
 
-          await ptz.sendFile(
-            m.chat,
-            result.downloads.data[0].link,
-            '',
-            `┌ ◦ *Username:* ${result.user.username}\n└ ◦ *Description:* ${result.user.description}`,
-            m
-          )
-        }
-        break
+      const caption = `┌ ◦ *Stats:*
+├ ◦ *Likes:* ${stats.likeCount || 0}
+├ ◦ *Views:* ${stats.playCount || 0}
+├ ◦ *Comments:* ${stats.commentCount || 0}
+├ ◦ *Shares:* ${stats.shareCount || 0}
+└ ◦ *Description:* ${metadata.description || '-'}`
+      
+      await ptz.sendFile(
+        m.chat,
+        videoUrl,
+        'tiktok.mp4',
+        caption,
+        m
+      )
+      await ptz.sendFile(
+        m.chat,
+        result.data.download.audio,
+        'tiktok.mp3',
+        '',
+        m
+      )
+    } catch (error) {
+      console.error('Error downloading TikTok:', error)
+      return m.reply('Terjadi kesalahan saat mengunduh video TikTok. Silakan coba lagi nanti.')
+    }
+  }
+  break
       case 'instagramdl':
       case 'igdl':
         {
