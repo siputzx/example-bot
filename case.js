@@ -157,7 +157,7 @@ module.exports = async (ptz, m) => {
               result += `┌ ◦ *Judul :* ${item.judul}\n│ ◦ *Tag :* ${item.uploader}\n└ ◦ *Link :* ${item.link}\n\n`
             })
           } else {
-            m.reply('Video Gore '+text+' belum ada untuk saat ini, coba cari yang lain')
+            m.reply('Video Gore ' + text + ' belum ada untuk saat ini, coba cari yang lain')
           }
           m.reply(result.trim())
         }
@@ -177,7 +177,7 @@ module.exports = async (ptz, m) => {
 └ ◦ *Search Vector :* ${item.searchVector}\n\n`
             })
           } else {
-            m.reply('Meme '+text+' belum ada untuk saat ini, coba cari yang lain')
+            m.reply('Meme ' + text + ' belum ada untuk saat ini, coba cari yang lain')
           }
           m.reply(result.trim())
         }
@@ -195,8 +195,8 @@ module.exports = async (ptz, m) => {
 │ ◦ *Rate :* ${item.rate2}
 │ ◦ *Developer :* ${item.developer}
 └ ◦ *Link :* ${item.link_dev}\n\n`
-            })          
-          await ptz.sendMessage(m.chat, {
+            })
+            await ptz.sendMessage(m.chat, {
               text: result,
               contextInfo: {
                 externalAdReply: {
@@ -209,8 +209,8 @@ module.exports = async (ptz, m) => {
                 }
               }
             })
-            } else {
-            m.reply('Aplikasi '+text+' belum ada untuk saat ini, coba cari yang lain')
+          } else {
+            m.reply('Aplikasi ' + text + ' belum ada untuk saat ini, coba cari yang lain')
           }
         }
         break
@@ -228,21 +228,21 @@ module.exports = async (ptz, m) => {
 │ ◦ *Created :* ${item.created_at}
 └ ◦ *Link :* ${item.permalink_url}\n\n`
             })
-          await ptz.sendMessage(m.chat, {
-            text: result.trim(),
-            contextInfo: {
-              externalAdReply: {
-                title: text,
-                body: 'Search SoundCloud',
-                thumbnailUrl: response.data.data[0].artwork_url,
-                sourceUrl: '',
-                mediaType: 1,
-                renderLargerThumbnail: true
+            await ptz.sendMessage(m.chat, {
+              text: result.trim(),
+              contextInfo: {
+                externalAdReply: {
+                  title: text,
+                  body: 'Search SoundCloud',
+                  thumbnailUrl: response.data.data[0].artwork_url,
+                  sourceUrl: '',
+                  mediaType: 1,
+                  renderLargerThumbnail: true
+                }
               }
-            }
-          })
+            })
           } else {
-            m.reply('Musik '+text+' belum ada untuk saat ini, coba cari yang lain')
+            m.reply('Musik ' + text + ' belum ada untuk saat ini, coba cari yang lain')
           }
         }
         break
@@ -261,7 +261,7 @@ module.exports = async (ptz, m) => {
               m
             )
           } else {
-            m.reply('gambar '+text+' belum ada untuk saat ini, coba cari yang lain')
+            m.reply('gambar ' + text + ' belum ada untuk saat ini, coba cari yang lain')
           }
         }
         break
@@ -280,7 +280,7 @@ module.exports = async (ptz, m) => {
               m
             )
           } else {
-            m.reply('Video tiktok '+text+' belum ada untuk saat ini, coba cari yang lain')
+            m.reply('Video tiktok ' + text + ' belum ada untuk saat ini, coba cari yang lain')
           }
         }
         break
@@ -305,7 +305,7 @@ module.exports = async (ptz, m) => {
               }
             })
           } else {
-            m.reply('Quoted Dari '+text+' belum ada untuk saat ini, coba cari yang lain')
+            m.reply('Quoted Dari ' + text + ' belum ada untuk saat ini, coba cari yang lain')
           }
         }
         break
@@ -345,50 +345,44 @@ module.exports = async (ptz, m) => {
         }
         break
       case 'tiktokdl':
-case 'ttdl':
-  {
-    if (!text) return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://vt.tiktok.com/ZSYmxyBnp/`)
-    
-    try {
-      const response = await api.get('/tiktok/v2', {params: {url: text}})
-      const result = response.data
-      
-      if (!result.success || !result.data || !result.data.download || !result.data.download.video || result.data.download.video.length === 0) {
-        return m.reply('Gagal mendapatkan video TikTok. Coba link yang lain.')
-      }
-      
-      const videoUrl = result.data.download.video[0]
-      
-      const metadata = result.data.metadata
-      const stats = metadata.stats || {}
+      case 'ttdl':
+        {
+          if (!text) return m.reply(`mau download apa?\n\nExample: ${prefix}${command} https://vt.tiktok.com/ZSYmxyBnp/`)
 
-      const caption = `┌ ◦ *Stats:*
+          try {
+            const response = await api.get('/tiktok/v2', {params: {url: text}})
+            const result = response.data
+
+            if (
+              !result.success ||
+              !result.data ||
+              !result.data.download ||
+              !result.data.download.video ||
+              result.data.download.video.length === 0
+            ) {
+              return m.reply('Gagal mendapatkan video TikTok. Coba link yang lain.')
+            }
+
+            const videoUrl = result.data.download.video[0]
+
+            const metadata = result.data.metadata
+            const stats = metadata.stats || {}
+
+            const caption = `┌ ◦ *Stats:*
 ├ ◦ *Likes:* ${stats.likeCount || 0}
 ├ ◦ *Views:* ${stats.playCount || 0}
 ├ ◦ *Comments:* ${stats.commentCount || 0}
 ├ ◦ *Shares:* ${stats.shareCount || 0}
 └ ◦ *Description:* ${metadata.description || '-'}`
-      
-      await ptz.sendFile(
-        m.chat,
-        videoUrl,
-        'tiktok.mp4',
-        caption,
-        m
-      )
-      await ptz.sendFile(
-        m.chat,
-        result.data.download.audio,
-        'tiktok.mp3',
-        '',
-        m
-      )
-    } catch (error) {
-      console.error('Error downloading TikTok:', error)
-      return m.reply('Terjadi kesalahan saat mengunduh video TikTok. Silakan coba lagi nanti.')
-    }
-  }
-  break
+
+            await ptz.sendFile(m.chat, videoUrl, 'tiktok.mp4', caption, m)
+            await ptz.sendFile(m.chat, result.data.download.audio, 'tiktok.mp3', '', m)
+          } catch (error) {
+            console.error('Error downloading TikTok:', error)
+            return m.reply('Terjadi kesalahan saat mengunduh video TikTok. Silakan coba lagi nanti.')
+          }
+        }
+        break
       case 'instagramdl':
       case 'igdl':
         {
